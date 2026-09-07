@@ -1,0 +1,14 @@
+---
+description: Never credit the agent as commit co-author or contributor
+alwaysApply: true
+---
+
+# No AI commit credit
+
+When creating or amending git commits:
+
+- Do **not** add `Co-authored-by`, `Signed-off-by`, or any trailer that names Cursor, the agent, or an AI.
+- Do **not** put the agent in the commit message as author, co-author, or contributor.
+- The commit author must remain the user only.
+
+If a wrapper or hook injects `Co-authored-by: Cursor` (or similar), remove it before finishing — amend only when the amend safety rules allow (HEAD created in this conversation, not pushed). Otherwise tell the user the trailer is present and ask how to remove it.

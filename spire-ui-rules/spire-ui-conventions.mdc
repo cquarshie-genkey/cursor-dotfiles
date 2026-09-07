@@ -1,0 +1,50 @@
+---
+description: Spire UI conventions — Spring MVC modules, codebase exploration, extend existing flows
+alwaysApply: true
+---
+
+# Spire UI Conventions
+
+Applies to Spire UI modules (`web/*-module`, `com.genkey.spireui` packages) — Spring MVC + Thymeleaf apps with `*UserRequestHandler`, `*Controller`, and `*SPiREViewHandler` patterns. Not for `spire-consoles` (Vaadin/Kotlin).
+
+## Codebase exploration — skip pom.xml
+
+- **Do not read, grep, or search `pom.xml` files** when exploring the codebase, tracing dependencies, or planning implementation.
+- Infer libraries and APIs from **source code**: `import` statements, existing handler/service/repo usage, and sibling modules under `web/base-modules`.
+- External types (e.g. `gkref` / `carp-ext`) are used via imports in handlers — follow those, not Maven coordinates.
+- Only open or edit `pom.xml` when the user explicitly requests a Maven dependency or build change.
+
+## Follow existing patterns first
+
+- Before adding any feature, search for similar implementations in the same module (`*UserRequestHandler`, `*Controller`, `*Util`, `*SPiREViewHandler`).
+- Reuse established package structure, naming, logging, and error-handling patterns already used in that module.
+- Prefer extending or adapting existing code over introducing new patterns.
+
+### Extend flows — do not parallel-copy
+
+Before adding a new handler method, search path, list endpoint, or table builder, ask:
+
+1. Is there already a `search` / `createSearchObject` / `addClauses*` / `*applicationslist` path?
+2. Can the need be met with **one extra clause, flag, or thin wrapper** on that path?
+3. Would a teammate see this as a near-duplicate of an existing method?
+
+**Prefer:** shared base clauses + a small delta (e.g. one stage filter).  
+**Avoid:** a second almost-identical `search*` / `addClauses*` that only differs by one filter.
+
+Dedicated URLs (e.g. `/management/list`) are fine when the page needs its own entry point — still reuse the existing search plumbing underneath.
+
+### Scheduled / batch selection is a database call
+
+- Jobs that select applications by a persisted field (e.g. current stage) must query the SPiRE database (JPA / the module’s `*DatabaseQueries` / `getDBManager().getEntityManager()`), not Elasticsearch / `SearchObj`.
+- Option/stage columns usually store the **key** (e.g. `"11"`), not `enum.name()`. Use `getKey()` in JPQL.
+
+### Reusing tables / pages safely
+
+- When reusing applications (or similar) DataTables for a non-supervisor role, do not assume `getSupervisorRole()` is non-null.
+- Supervisor-only helpers (`getSupervisorRole()`, type filters, review redirects) are for approval desks — do not overload them to mean “any role that can open a listing.”
+- Gate feature access with `sec:authorize` / `@PreAuthorize` authorities; keep supervisor routing separate.
+- New features must not change behavior of existing supervisor/applications/payment flows unless explicitly requested.
+
+## Learning workflow → rules
+
+- When the user repeatedly corrects the same kind of issue, update this rule (or add a review rule) rather than relying on memory alone.

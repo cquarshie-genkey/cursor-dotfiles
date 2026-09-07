@@ -1,0 +1,38 @@
+---
+description: Spire consoles conventions (architecture, patterns, API, DTOs, UI, rule learning)
+alwaysApply: true
+---
+
+# Spire Consoles Conventions
+
+## Architecture conformance (required)
+- All implementations must conform to `docs/ARCHITECTURE.md` (module boundaries, layered architecture, and conventions).
+- In particular: keep UI in `views/`, view-logic in `*UseCase` classes, API integration in `service/`, and shared UI building blocks in `components/`.
+
+## Follow existing patterns first (required)
+- Before adding any feature, class, method, or component, search the codebase for similar implementations.
+- If an established pattern, structure, naming convention, or architectural approach already exists, conform to it unless the user explicitly requests otherwise.
+- Reuse design patterns, package/folder structure, naming, coding style, logging, error handling, validation, and API design already used in the project.
+- Prefer extending or adapting existing code over introducing new patterns.
+- If multiple patterns exist or the codebase is inconsistent, call that out and ask which approach to follow before proceeding.
+
+## API paths in services
+- Define one `BASE_PATH` per service (e.g. `"/api/v1/spire/demarcations"`).
+- Derive all related endpoints by composing from `BASE_PATH` (avoid duplicating the prefix literal).
+- If a new endpoint shares an existing base, prefer `BASE_PATH + "/..."` over a second hard-coded string.
+
+## DTO / model usage
+- Prefer using Spire API model types directly (or via Kotlin `typealias`) when they match the needed shape.
+- Introduce console-local DTOs only when:
+  - the UI needs a simplified/derived shape (e.g. hierarchy breadcrumb items), or
+  - the API lacks an appropriate model for the response being consumed, or
+  - the console needs a stable UI contract decoupled from API changes.
+
+## UI detail cards & hierarchy
+- Use `DetailFieldsCard` for dynamic form-like detail rendering from `List<AField>`, `List<List<AField>>`, or simple `Map` empty-states.
+- Don’t force non-form layouts (e.g. hierarchy breadcrumb/chips with separators and “current” styling) into `DetailFieldsCard`.
+- If reuse is desired, extract a shared “detail card wrapper/header builder” rather than bending form builders to custom layouts.
+
+## Learning workflow → rules
+- When the user repeatedly corrects the same kind of issue or follows a consistent workflow, treat it as a candidate for a Cursor rule.
+- Proactively suggest adding/updating a rule when you notice a pattern more than once.

@@ -1,0 +1,30 @@
+---
+description: When a simpler/data fix may beat code, ask before implementing
+alwaysApply: true
+---
+
+# Ask Before Choosing an Approach
+
+When fixing a bug or adding behavior, if there is a plausible **simpler or better alternative** (especially outside app code) and you are **not sure** which approach the user wants:
+
+- **Stop. Do not implement yet.**
+- Briefly present the options (trade-offs in 1–2 lines each).
+- Ask which approach to take; wait for an explicit choice.
+
+## Common cases
+
+- Master-data / config fix (CSV, options file, DB seed) vs filtering or special-casing in application code
+- Reusing or extending an existing path vs adding parallel logic
+- Config/feature-flag vs hard-coded behavior
+- One-line call-site change vs a new abstraction
+
+## Example
+
+Duplicate labels in a Missing Documents dropdown:
+
+- **Ask first:** remove duplicate rows from `options_documenttypes.csv` vs dedupe by label in Java
+- **Do not:** implement code-side dedupe without asking when CSV cleanup is a reasonable option
+
+## Exception
+
+Proceed without asking only when the user already chose the approach, or there is a single clear established pattern in this codebase with no meaningful alternative.

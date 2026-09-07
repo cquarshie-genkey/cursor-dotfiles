@@ -1,0 +1,72 @@
+---
+description: Use case design patterns for Spire Consoles
+globs: **/*UseCase.kt
+alwaysApply: false
+---
+
+# Use Case Patterns
+
+## Co-locate related use cases in the same file (required)
+
+If a use case covers a sub-concern that could stand alone (e.g. hierarchy fetching broken out of center-detail fetching), define it as a separate class **in the same file** rather than a new file or a private method.
+
+```kotlin
+// ✅ GOOD — FetchHierarchyUseCase lives in FetchCenterDetailUseCase.kt
+class FetchCenterDetailUseCase(...) {
+    private fun fetchHierarchyForCenter(...) =
+        FetchHierarchyUseCase(demarcationService).execute(...)
+}
+
+class FetchHierarchyUseCase(private val demarcationService: DemarcationService) {
+    fun execute(entryCode: String, depth: Int, onError: ...): List<DemarcationEntryInfo>
+}
+
+// ❌ BAD — private helper method duplicating logic that could be its own use case
+class FetchCenterDetailUseCase(...) {
+    private fun fetchHierarchyForCenter(...): List<DemarcationEntryInfo> { ... }
+}
+```
+
+## Non-nullable service = required dependency
+
+When a use case is dedicated to a single service, inject it as non-nullable. Reserve nullable (`Service? = null`) only for **optional features** in a parent/composite use case.
+
+```kotlin
+// ✅ GOOD — FetchHierarchyUseCase always needs DemarcationService
+class FetchHierarchyUseCase(private val demarcationService: DemarcationService)
+
+// ✅ GOOD — hierarchy is optional in the composite use case
+class FetchCenterDetailUseCase(
+    private val centerService: CenterService,
+    private val demarcationService: DemarcationService? = null,  // null = feature disabled
+)
+```
+
+## Composite use cases delegate to focused use cases
+
+A use case that coordinates multiple concerns should construct and delegate to the focused use cases rather than re-implementing their logic inline.
+
+## Services are pure API adapters (required)
+
+Services make HTTP calls, deserialize responses, and wrap them in `ApiResponse`. They must **not** contain view-logic such as sorting, filtering, blank-code guards, or any other business rules — those belong in the use case.
+
+```kotlin
+// ✅ GOOD — service returns raw SearchingResult, no sorting
+fun getEntryParents(entryCode: String, depth: Int): ApiResponse<SearchingResult<DemarcationEntryInfo>> {
+    // HTTP call + deserialize + wrap in ApiResponse
+}
+
+// ✅ GOOD — use case owns sort and blank guard
+fun execute(entryCode: String, ...): List<DemarcationEntryInfo> {
+    if (entryCode.isBlank()) return emptyList()
+    val response = demarcationService.getEntryParents(entryCode, depth)
+    return response.payload?.content?.records.orEmpty()
+        .sortedBy { it.demarcationLevel?.code ?: Int.MAX_VALUE }
+}
+
+// ❌ BAD — service sorts results before returning
+fun getEntryParents(...): ApiResponse<List<DemarcationEntryInfo>> {
+    val entries = page.records.orEmpty().sortedBy { it.demarcationLevel?.code ?: Int.MAX_VALUE }
+    return hierarchyResponse(entries)
+}
+```

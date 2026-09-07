@@ -1,0 +1,52 @@
+---
+description: Use domain-meaningful names for code, comments, and UI copy
+alwaysApply: true
+---
+
+# Meaningful Naming
+
+When writing or reviewing code, prefer names that describe **what something does in this product/domain**, not implementation jargon from another field.
+
+## Check names against purpose
+
+Before naming (or accepting) a symbol, comment, or user-facing string, ask:
+- What is the user or caller trying to accomplish?
+- Would a teammate unfamiliar with the feature understand this without extra context?
+- Does the name match existing terms already used in this codebase or UI?
+
+If not, rename or flag it during review.
+
+## Prefer domain language over generic jargon
+
+Avoid borrowed terms (BI, infra, framework internals) when a plain domain term exists.
+
+```kotlin
+// ❌ BAD — reporting jargon; unclear in a hierarchy table
+fun canDrillInto(entry: DemarcationEntryInfo): Boolean
+// "Double-click to drill down into the entry"
+
+// ✅ GOOD — describes the action and outcome
+fun canOpenEntry(entry: DemarcationEntryInfo): Boolean
+// "Double-click to open the entry and view its children"
+```
+
+Other examples:
+- **open / navigate into / view children** — not *drill*, *penetrate*, *traverse*
+- **leaf entry / deepest level** — not *terminal drill target*
+- **fetch / load** — not *hydrate* unless that term is already established locally
+
+## Scope: code, docs, and UI
+
+Apply the same standard to:
+- methods, functions, variables, classes, and test names
+- KDoc and inline comments
+- i18n keys and user-visible labels (buttons, toasts, empty states)
+
+## When reviewing changes
+
+Proactively suggest clearer names when you spot:
+- abbreviations that aren’t project-standard
+- names that describe *how* (implementation) instead of *what* (behavior)
+- mismatches between comment/UI text and the code symbol (e.g. comment says “open”, method says `drill`)
+
+Match naming to established patterns in the repo unless the user explicitly wants a rename.

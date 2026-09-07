@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/clear-superpowers-sdd.ps1",
+        "loop_limit": 0
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/clear-superpowers-sdd.ps1"
+      }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+---
+description: Consult and update the shared local troubleshooting log for env/startup issues
+alwaysApply: true
+---
+
+# Local troubleshooting log
+
+Before treating a local startup, deploy, or environment error as an application bug, read `c:\dev\genkey projects\.cursor\TROUBLESHOOTING.local.md`.
+
+If the symptom matches an existing entry, follow that fix first.
+
+When a new local/runtime issue is diagnosed and fixed, add an entry at the top of that file (do not commit it). Use the template already in the file.

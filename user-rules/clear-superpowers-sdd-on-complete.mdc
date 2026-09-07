@@ -1,0 +1,15 @@
+---
+description: Clear Superpowers SDD scratch when agent work is finished
+alwaysApply: true
+---
+
+# Clear Superpowers SDD On Task Completion
+
+When you finish the user's requested work (feature done, plan executed, or you are giving the final completion response):
+
+1. If `<repo-root>/.superpowers/sdd/` exists, **delete its contents** (task briefs, reports, review diffs, `progress.md`).
+2. Do this before the final user-facing summary.
+3. Do **not** commit the cleanup. Do **not** touch project `.gitignore` for this.
+4. Do **not** clear mid-task while SDD work is still in progress (incomplete tasks still being implemented/reviewed).
+
+Leaving `.superpowers/sdd/` artifacts after a completed task is incorrect.

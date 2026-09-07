@@ -1,0 +1,53 @@
+---
+description: Review Spire UI changes for pattern reuse, parallel implementations, regression risk, bugs, and security issues. Invoke when the user asks to review Spire UI work, review before commit/PR, or check conventions on a diff.
+alwaysApply: false
+---
+
+# Spire UI change review
+
+Use when the user asks to review Spire UI / `web/*-module` work (before commit, PR, or after a feature).
+
+## Review sequence
+
+Run all three reviews automatically — do not wait to be asked for each one separately:
+
+1. **Security review** — invoke the `review-security` skill against branch changes for this repository. Report findings (severity, location, description) before continuing.
+2. **Bug review** — invoke the `review-bugbot` skill against branch changes for this repository. Report findings before continuing.
+3. **Conventions review** — apply the checklist below against `spire-ui-conventions`.
+
+Do not implement fixes unless asked — report findings from all three reviews first.
+
+## Checklist
+
+### Pattern reuse (high priority)
+
+- [ ] New `*Handler` / search / list methods: is there an existing `search` / `addClauses*` / applications-list flow that should have been extended instead?
+- [ ] Flag near-duplicates that only add one filter/clause vs a parallel copy.
+- [ ] Dedicated page/URL is OK; parallel search plumbing is not, unless justified.
+
+### Roles and table reuse
+
+- [ ] Non-supervisor roles (e.g. passport request management) do not NPE on `getSupervisorRole()`.
+- [ ] Feature access uses authorities (`PreAuthorize` / `sec:authorize`), not by stuffing roles into `getSupervisorRole()`.
+- [ ] Supervisor type filters / review redirects unchanged unless the story requires it.
+
+### Regression
+
+- [ ] Existing applications / approval / payment list endpoints and clause behavior unchanged for prior roles.
+- [ ] Shared helpers extracted carefully (call sites still behave the same for supervisors).
+
+### UI / i18n (when UI changed)
+
+- [ ] Reuses existing templates/fragments where practical (e.g. applications DataTable) rather than a one-off table.
+- [ ] New user-facing strings have `messages_en.properties` / `messages_fr.properties` keys as the module already does (`messages.properties` is unused in carp — do not require it).
+
+## Output format
+
+Produce one combined report covering all three reviews:
+
+1. **Verdict:** OK / needs changes
+2. **Security findings:** severity-sorted table (Severity / Location / Finding) — or "None found"
+3. **Bug findings:** severity-sorted table (Severity / Location / Finding) — or "None found"
+4. **Convention blockers:** parallel implementations, regressions, NPEs
+5. **Suggestions:** optional cleanups
+6. **Explicit OK areas:** what correctly followed existing patterns
